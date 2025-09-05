@@ -1,0 +1,7 @@
+{
+  "id": "sblockvelocity",
+  "name": "SBlockVelocity",
+  "version": "1.0",
+  "authors": ["Sebirka"],
+  "main": "org.sebirka.sblockvelocity.SBlockVelocity"
+}

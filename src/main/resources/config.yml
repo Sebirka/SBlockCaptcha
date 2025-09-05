@@ -1,0 +1,40 @@
+# SBlockVelocity Configuration
+
+captcha:
+  digits_to_draw: 4
+  max_failed_attempts: 3
+  timeout_minutes: 2
+  platform_block: "minecraft:snow_block"
+  digit_block: "minecraft:redstone_block"
+  platform_size: 5
+  captcha_start_y: 101
+  captcha_start_z: 10
+  captcha_message_delay_seconds: 3
+  captcha_message_repeat_seconds: 20
+  chat_clear_lines: 25
+
+messages:
+  error_loading_captcha: "<red>Произошла ошибка при загрузке капчи. Пожалуйста, попробуйте еще раз.</red>"
+  player_left_captcha_zone: "<red>Вы покинули зону капчи.</red>"
+  too_many_failed_attempts: "<red>Слишком много неверных попыток.</red>"
+  captcha_incorrect: "<red>Неверно. Попробуйте еще раз. Осталось попыток: <yellow>%attempts_left%</yellow></red>"
+  captcha_timeout: "<red>Превышено время прохождения капчи.</red>"
+  captcha_title_main: "<gold><bold>YOUR SERVER</bold></gold>"
+  captcha_title_subtitle: "<white>Идет проверка</white>"
+  captcha_instruction_main: "<gold><bold>Captcha</bold></gold>"
+  captcha_instruction_prefix: "<reset><dark_gray> » </dark_gray>"
+  captcha_instruction_line1: "<reset><white>Пожалуйста, введите цифры, которые вы видите.</white>"
+  captcha_instruction_line2: "<reset><bold><gold>1.</gold></bold> <white>Посмотрите на блоки перед вами.</white>"
+  captcha_instruction_line3: "<reset><bold><gold>2.</gold></bold> <white>Введите 4 цифры в чат </white><yellow>СЛЕВА НАПРАВО</yellow><white>.</white>"
+  captcha_instruction_line4: "<reset><bold><gold>3.</gold></bold> <white>Нажмите Enter.</white>"
+limbo:
+  filter_world_spawn_x: 100
+  filter_world_spawn_y: 100
+  filter_world_spawn_z: 100
+  filter_world_platform_y: 10
+  filter_world_platform_min_x: 92
+  filter_world_platform_max_x: 108
+  filter_world_platform_min_z: 92
+  filter_world_platform_max_z: 108
+  filter_server_name: "BubbleCaptcha"
+  filter_server_read_timeout: 10000
