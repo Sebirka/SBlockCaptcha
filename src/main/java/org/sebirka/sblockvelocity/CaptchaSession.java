@@ -15,11 +15,8 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.UUID;
 
 public class CaptchaSession implements LimboSessionHandler {
     private final ProxyServer server;
@@ -31,22 +28,24 @@ public class CaptchaSession implements LimboSessionHandler {
     private ScheduledTask captchaMessageTask;
     private ScheduledTask timeoutTask;
     private int[] drawnDigits;
-    public static final Map<Integer, boolean[][]> DIGIT_PATTERNS = new HashMap<>();
+    private static final Map<Integer, boolean[][]> DIGIT_PATTERNS = createDigitPatterns();
     private int failedAttempts = 0;
     private final int maxFailedAttempts;
     private boolean lastMessageWasError = false;
 
-    static {
-        DIGIT_PATTERNS.put(0, new boolean[][]{{true, true, true}, {true, false, true}, {true, false, true}, {true, false, true}, {true, true, true}});
-        DIGIT_PATTERNS.put(1, new boolean[][]{{false, true, false}, {true, true, false}, {false, true, false}, {false, true, false}, {true, true, true}});
-        DIGIT_PATTERNS.put(2, new boolean[][]{{true, true, true}, {false, false, true}, {true, true, true}, {true, false, false}, {true, true, true}});
-        DIGIT_PATTERNS.put(3, new boolean[][]{{true, true, true}, {false, false, true}, {true, true, true}, {false, false, true}, {true, true, true}});
-        DIGIT_PATTERNS.put(4, new boolean[][]{{true, false, true}, {true, false, true}, {true, true, true}, {false, false, true}, {false, false, true}});
-        DIGIT_PATTERNS.put(5, new boolean[][]{{true, true, true}, {true, false, false}, {true, true, true}, {false, false, true}, {true, true, true}});
-        DIGIT_PATTERNS.put(6, new boolean[][]{{true, true, true}, {true, false, false}, {true, true, true}, {true, false, true}, {true, true, true}});
-        DIGIT_PATTERNS.put(7, new boolean[][]{{true, true, true}, {false, false, true}, {false, true, false}, {true, false, false}, {true, false, false}});
-        DIGIT_PATTERNS.put(8, new boolean[][]{{true, true, true}, {true, false, true}, {true, true, true}, {true, false, true}, {true, true, true}});
-        DIGIT_PATTERNS.put(9, new boolean[][]{{true, true, true}, {true, false, true}, {true, true, true}, {false, false, true}, {true, true, true}});
+    private static Map<Integer, boolean[][]> createDigitPatterns() {
+        Map<Integer, boolean[][]> patterns = new HashMap<>();
+        patterns.put(0, new boolean[][]{{true, true, true}, {true, false, true}, {true, false, true}, {true, false, true}, {true, true, true}});
+        patterns.put(1, new boolean[][]{{false, true, false}, {true, true, false}, {false, true, false}, {false, true, false}, {true, true, true}});
+        patterns.put(2, new boolean[][]{{true, true, true}, {false, false, true}, {true, true, true}, {true, false, false}, {true, true, true}});
+        patterns.put(3, new boolean[][]{{true, true, true}, {false, false, true}, {true, true, true}, {false, false, true}, {true, true, true}});
+        patterns.put(4, new boolean[][]{{true, false, true}, {true, false, true}, {true, true, true}, {false, false, true}, {false, false, true}});
+        patterns.put(5, new boolean[][]{{true, true, true}, {true, false, false}, {true, true, true}, {false, false, true}, {true, true, true}});
+        patterns.put(6, new boolean[][]{{true, true, true}, {true, false, false}, {true, true, true}, {true, false, true}, {true, true, true}});
+        patterns.put(7, new boolean[][]{{true, true, true}, {false, false, true}, {false, true, false}, {true, false, false}, {true, false, false}});
+        patterns.put(8, new boolean[][]{{true, true, true}, {true, false, true}, {true, true, true}, {true, false, true}, {true, true, true}});
+        patterns.put(9, new boolean[][]{{true, true, true}, {true, false, true}, {true, true, true}, {false, false, true}, {true, true, true}});
+        return Collections.unmodifiableMap(patterns);
     }
 
     public CaptchaSession(ProxyServer server, Player player, SBlockVelocity plugin) {
@@ -89,12 +88,6 @@ public class CaptchaSession implements LimboSessionHandler {
                     .setShouldUpdateTags(true);
             this.limboServer.spawnPlayer(player, this);
 
-            sendTitle(player,
-                    plugin.getConfig().getCaptchaTitleMain(),
-                    plugin.getConfig().getCaptchaTitleSubtitle(),
-                    MiniMessage.miniMessage().deserialize(plugin.getConfig().getCaptchaTitleMain()).color(),
-                    MiniMessage.miniMessage().deserialize(plugin.getConfig().getCaptchaTitleSubtitle()).color(),
-                    0, 2500, 0);
 
         } catch (Throwable t) {
             player.disconnect(MiniMessage.miniMessage().deserialize(plugin.getConfig().getMessageErrorLoadingCaptcha()));
@@ -139,7 +132,7 @@ public class CaptchaSession implements LimboSessionHandler {
             expectedDigitsBuilder.append(digit);
         }
         String expectedCaptcha = expectedDigitsBuilder.toString();
-        String reversedCaptcha = new StringBuilder(expectedCaptcha).reverse().toString(); // Создаем зеркальную строку
+        String reversedCaptcha = new StringBuilder(expectedCaptcha).reverse().toString();
 
         String trimmedMessage = message.trim();
         if (trimmedMessage.equals(reversedCaptcha)) {
@@ -162,7 +155,7 @@ public class CaptchaSession implements LimboSessionHandler {
             server.getScheduler().buildTask(plugin, () -> {
                 sendCaptchamessage(player, plugin.getConfig().getChatClearLines());
                 lastMessageWasError = false;
-            }).delay(2, TimeUnit.SECONDS).schedule(); 
+            }).delay(2, TimeUnit.SECONDS).schedule();
         }
     }
 
@@ -181,7 +174,6 @@ public class CaptchaSession implements LimboSessionHandler {
 
     @Override
     public void onDisconnect() {
-
         cleanup();
     }
 
@@ -259,14 +251,8 @@ public class CaptchaSession implements LimboSessionHandler {
         for (int i = 0; i < chatclear; i++) {
             player.sendMessage(Component.text(" "));
         }
-        String[] lines = {
-                plugin.getConfig().getMessageCaptchaInstructionLine1(),
-                plugin.getConfig().getMessageCaptchaInstructionLine2(),
-                plugin.getConfig().getMessageCaptchaInstructionLine3(),
-                plugin.getConfig().getMessageCaptchaInstructionLine4()
-        };
-
-        for (String line : lines) {
+        List<String> instructions = plugin.getConfig().getCaptchaInstruction();
+        for (String line : instructions) {
             Component fullLine = MiniMessage.miniMessage().deserialize(
                     plugin.getConfig().getMessageCaptchaInstructionMain() +
                             plugin.getConfig().getMessageCaptchaInstructionPrefix() +
@@ -274,20 +260,6 @@ public class CaptchaSession implements LimboSessionHandler {
             );
             player.sendMessage(fullLine);
         }
-
         player.sendMessage(Component.text(" "));
-    }
-
-    public static void sendTitle(Player player, String titleMiniMessage, String subtitleMiniMessage,
-                                 TextColor color, TextColor color2, int fadeIn, int stay, int fadeOut) {
-        player.showTitle(Title.title(
-                MiniMessage.miniMessage().deserialize(titleMiniMessage),
-                MiniMessage.miniMessage().deserialize(subtitleMiniMessage),
-                Title.Times.times(
-                        Duration.ofMillis(fadeIn),
-                        Duration.ofMillis(stay),
-                        Duration.ofMillis(fadeOut)
-                )
-        ));
     }
 }
